@@ -1,82 +1,72 @@
 const fs = require("fs")
 const { get } = require("http")
 
-
-/* fs.mkdirSync("./productsFolder"); */
-
-
-
-
 class Contenedor {
     constructor(archivo) {
         this.archivo = archivo
     }
 
-    save(object) {
-        
-        let objAddId;
-        const data = leerArchivo(this.archivo)
-        const mapeo = data.map((product) => product.id)
-        const mayorId = Math.max(...mapeo);
-        const nuevoID = mayorId+1
-        nuevoID === -Infinity ? objAddId = 1 : objAddId = nuevoID
-        const objAddedId = {...object, id:objAddId}
-        data.push(objAddedId) 
-        escribirArchivo(this.archivo, JSON.stringify(data))
-        console.log("el numero de ID asignado es: "+ objAddId)
+    async save(object) {
+        try {
+            let objAddId;
+            const data = await leerArchivo(this.archivo);
+            const mapeo = await data.map((product) => product.id);
+            const mayorId = Math.max(...mapeo);
+            const nuevoID = mayorId+1;
+            nuevoID === -Infinity ? objAddId = 1 : objAddId = nuevoID;
+            const objAddedId = {...object, id:objAddId};
+            data.push(objAddedId);
+            escribirArchivo(this.archivo, JSON.stringify(data))
+            console.log("el numero de ID asignado es: "+ objAddId)
+        }
+        catch(error) {
+            console.log(error)
+        }
     }
 
-    getById(Number) {
-        const data = leerArchivo(this.archivo)
+    async getById(Number) {
+        const data = await leerArchivo(this.archivo)
         const found = data.find(p => p.id === Number);
 
         if(found === undefined){
             console.log("no se ha encontrado el item")
         }else {
             const filtro = data.filter(product => product.id ===Number);
-            console.log("deletingByID: "+Number)
             console.log(filtro)
         }
-        
     }
 
-    getAll() {
-        const data = leerArchivo(this.archivo)
-        console.log("gettingAll: ")
+    async getAll() {
+        const data = await leerArchivo(this.archivo)
         console.log(data)
     }
 
-    deleteById(Number) {
-        const data = leerArchivo(this.archivo)
+    async deleteById(Number) {
+        const data = await leerArchivo(this.archivo)
         const found = data.find(p => p.id === Number);
-
         if(found === undefined){
             console.log("no se ha encontrado el item")
         }else {
             const filtro = data.filter(product => product.id !==Number);
-            console.log("deletingByID: "+Number)
+            console.log("producto eliminado con exito")
             console.log(filtro)
             escribirArchivo(this.archivo, JSON.stringify(filtro))
         }
     }
 
-    deleteAll() {
+    async deleteAll() {
         const nuevoArray = []
-        console.log("deletingAll: ")
-        console.log(nuevoArray)
-        escribirArchivo(this.archivo, JSON.stringify(nuevoArray))
+        console.log("productos eliminados con exito")
+        await escribirArchivo(this.archivo, JSON.stringify(nuevoArray))
     }
 }
 
-const cont1 = new Contenedor ("./productos.json")
 
 
-
-
-leerArchivo =  (archivo) => {
+leerArchivo = async (archivo) => {
     try {
-        const data =  fs.readFileSync(archivo,"utf-8")
-        const dataParse =  JSON.parse(data)
+        const data = await fs.promises.readFile(archivo,"utf-8")
+        const dataParse = JSON.parse(data)
         return dataParse
     }
     catch(error) {
@@ -85,10 +75,10 @@ leerArchivo =  (archivo) => {
     }
 }
 
-escribirArchivo =  (archivo, data) => {
+escribirArchivo = async (archivo, data) => {
     try {
-        fs.writeFileSync(archivo, data)
-        console.log("archivo editado exitosamente")
+        await fs.promises.writeFile(archivo, data)
+        console.log("archivo actualizado con exito")
     }
     catch(error) {
         console.log("error")
@@ -96,79 +86,18 @@ escribirArchivo =  (archivo, data) => {
     }
 }
 
-editarArchivo =  (archivo, texto) => {
-    try {
-        fs.appendFileSync(archivo, texto)
-        console.log("archivo editado")
-    }
-    catch(error) {
-        console.log("error")
-        console.log(error.message)
-    }
-}
+const cont1 = new Contenedor ("./productos.json")
 
-eliminarArchivo = (archivo) => {
-    try {
-        fs.unlink(archivo)
-        console.log("archivo borrado")
-    }
-    catch(error) {
-        console.log("error")
-        console.log(error.message)
-    }
-}
+const producto1 = {title: "buzo", price: 7000, thumbnail: "urlBuzo"};
+const producto2 = {title: "camisa", price: 9000, thumbnail: "urlCamisa"};
+const producto3 = {title: "pantalon", price: 6000, thumbnail: "urlPantalon"};
+const producto4 = {title: "campera", price: 14000, thumbnail: "urlCampera"};
+const producto5 = {title: "remera", price: 4000, thumbnail: "urlremera"};
 
 
 // llamados
-
-/*
-cont1.getAll()
-cont1.getById(3)
-cont1.deleteById(1)
-cont1.deleteAll() 
-cont1.save({title: "buzo", price: 7000, thumbnail: "urlBuzos"})
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// cont1.getById(3)
+// cont1.deleteById(1)
+// cont1.deleteAll() 
+// cont1.getAll()
+// cont1.save(producto1)
